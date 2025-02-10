@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Car Racing game</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      margin: 20px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="raceCanvas" width="1200" height="800"></canvas>
+  <button onclick="beginRace()">Start Race</button>
+
+  <script>
+    class RaceCar {
+      constructor(id, yPosition) {
+        this.id = id;
+        this.x = canvas.width - 100;
+        this.y = yPosition;
+        this.speed = this.getRandomSpeed();
+        this.bodyColor = this.getRandomColor();
+        this.windowColor = this.getRandomColor();
+      }
+
+      getRandomSpeed() {
+        return Math.floor(Math.random() * 8) + 1;
+      }
+
+      getRandomColor() {
+        return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+      }
+
+      drawCar() {
+        ctx.fillStyle = this.bodyColor;
+        ctx.fillRect(this.x, this.y, 100, 50);
+
+        ctx.fillStyle = this.windowColor;
+        for (let i = 0; i < 4; i++) {
+          ctx.fillRect(this.x + 10 + i * 20, this.y + 10, 15, 10);
+        }
+
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(this.x, this.y, 100, 50);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Arial';
+        ctx.fillText(this.id, this.x + 40, this.y + 30);
+
+        ctx.fillStyle = 'red';
+        [20, 80].forEach(offset => {
+          ctx.beginPath();
+          ctx.arc(this.x + offset, this.y + 50, 10, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      moveCar() {
+        if (raceActive) {
+          this.x -= this.speed;
+          this.speed = this.getRandomSpeed();
+          if (this.x <= 0) {
+            raceActive = false;
+            alert(`Car ${this.id} wins the race!`);
+          }
+        }
+        this.drawCar();
+      }
+    }
+
+    const canvas = document.getElementById('raceCanvas');
+    const ctx = canvas.getContext('2d');
+    const raceCars = [];
+    let raceActive = false;
+
+    function beginRace() {
+      if (!raceActive) {
+        raceActive = true;
+        raceCars.forEach(car => car.speed = car.getRandomSpeed());
+      }
+    }
+
+    function initializeRace() {
+      for (let i = 0; i < 4; i++) {
+        raceCars.push(new RaceCar(i + 1, 100 + i * 100));
+      }
+      setInterval(refreshCanvas, 20);
+    }
+
+    function refreshCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      raceCars.forEach(car => car.moveCar());
+    }
+
+    initializeRace();
+  </script>
+</body>
+</html>
